@@ -35,6 +35,10 @@ public class HelloController {
 
     private ArrayList<Hashtable<String, Double>> produits = new ArrayList<>();
 
+    private double totalBenefit=0;
+
+    private List<String> other= new ArrayList<>();
+
     @FXML
     private void initialize() {
         dropArea.setOnDragOver(this::handleDragOver);
@@ -135,7 +139,7 @@ public class HelloController {
     }
 
     private int countFirstTableRows(Sheet sheet) {
-        int startRow = 7; // A8 corresponds to the 7th index
+        int startRow = 8; // A9 corresponds to the 8th index
         int rowCount = 0;
         String searchString = "Détails des colis :";
 
@@ -157,6 +161,8 @@ public class HelloController {
     private int countSecondTableRows(Sheet sheet) {
         String searchString = "Détails des colis :";
         int startRow = 0;
+
+        // Find the row where the search string is located
         for (int i = 0; true; i++) {
             Row row = sheet.getRow(i);
             if (row != null) {
@@ -168,19 +174,81 @@ public class HelloController {
                 }
             }
         }
+
+        // If the search string was not found, return 0
         if (startRow == 0) {
             return 0; // "Détails des colis :" not found
         }
 
         int rowCount = 0;
-        for (int i = startRow ; true; i++) {
+
+        // Process rows starting from startRow + 1
+        for (int i = startRow+1; true; i++) {
             Row row = sheet.getRow(i);
             if (row == null || isRowEmpty(row)) {
-                break;
+                break; // Stop processing if the row is empty or null
             }
             rowCount++;
+
+            // Extract designation (column 9) and montant (column 11)
+            Cell designationCell = row.getCell(9);
+            Cell montantCell = row.getCell(11);
+
+            String designation = "";
+            double montant = 0.0;
+
+            // Check cell types before extracting values
+            if (designationCell != null) {
+                if (designationCell.getCellType() == CellType.STRING) {
+                    designation = designationCell.getStringCellValue();
+                } else if (designationCell.getCellType() == CellType.NUMERIC) {
+                    System.out.println("\nerror here: "+designation+"\n");
+                    designation = String.valueOf(designationCell.getNumericCellValue());
+                }
+            }
+
+            if (montantCell != null) {
+                if (montantCell.getCellType() == CellType.NUMERIC) {
+                    montant = montantCell.getNumericCellValue();
+                } else if (montantCell.getCellType() == CellType.STRING) {
+                    try {
+                        System.out.println("\nerror here: "+montant+"\n");
+
+                        montant = Double.parseDouble(montantCell.getStringCellValue().replace(',', '.'));
+                    } catch (NumberFormatException e) {
+                        System.err.println("Warning: Cannot parse number from '" + montantCell.getStringCellValue() + "'. Continuing with 0.0.");
+                        montant = 0.0;
+                    }
+                }
+            }
+
+            // Print or process designation and montant
+
+
+            // Example usage of findMatchingValue to calculate totalBenefit
+            double priceCorresponding = findMatchingValue(designation, produits);
+            if (priceCorresponding != -999.0) {
+                System.out.println("Designation: " + designation + ", Montant: " + montant);
+                totalBenefit += montant ; // Adjust as per your business logic
+            }else{
+                other.add(designation);
+            }
         }
+
+        System.out.println("Net Benefit: " + totalBenefit);
+        System.out.println("not include: " + other+" lenght: "+other.size());
         return rowCount;
+    }
+
+    public static double findMatchingValue(String designation, ArrayList<Hashtable<String, Double>> liste) {
+        for (Hashtable<String, Double> map : liste) {
+            for (String key : map.keySet()) {
+                if (containsIgnoreCase(designation, key)) {
+                    return map.get(key);
+                }
+            }
+        }
+        return -999.0;
     }
 
     private boolean isRowEmpty(Row row) {
