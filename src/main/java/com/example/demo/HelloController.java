@@ -229,7 +229,7 @@ public class HelloController {
             double priceCorresponding = findMatchingValue(designation, produits);
             if (priceCorresponding != -999.0) {
                 System.out.println("Designation: " + designation + ", Montant: " + montant);
-                totalBenefit += montant ; // Adjust as per your business logic
+                totalBenefit += montant-priceCorresponding*1000 ; // Adjust as per your business logic
             }else{
                 other.add(designation);
             }
