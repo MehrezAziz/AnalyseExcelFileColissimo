@@ -137,10 +137,16 @@ public class HelloController {
     private int countFirstTableRows(Sheet sheet) {
         int startRow = 7; // A8 corresponds to the 7th index
         int rowCount = 0;
-        for (int i = startRow; i < sheet.getPhysicalNumberOfRows(); i++) {
-            Row row = sheet.getRow(i);
+        String searchString = "Détails des colis :";
 
-            if (row == null || isRowEmpty(row)) {
+        for (int i = startRow; true; i++) {
+            Row row = sheet.getRow(i);
+            Cell cell = row.getCell(0);
+            if (cell != null && cell.getCellType() == CellType.STRING &&
+                    searchString.equals(cell.getStringCellValue())) {
+                break;
+            }
+            if (row == null || isRowEmpty(row) ) {
                 break;
             }
             rowCount++;
@@ -167,7 +173,7 @@ public class HelloController {
         }
 
         int rowCount = 0;
-        for (int i = startRow + 1; true; i++) {
+        for (int i = startRow ; true; i++) {
             Row row = sheet.getRow(i);
             if (row == null || isRowEmpty(row)) {
                 break;
@@ -216,7 +222,7 @@ public class HelloController {
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                //lahné l5edma
+
                 Hashtable <String,Double> dic=extractNumbersFromParentheses(line);
                 produits.add(dic);
                 content.append(line).append("\n");
@@ -224,6 +230,7 @@ public class HelloController {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         produits=sortDictionariesByStringLength(produits);
         System.out.println("sorted products: "+produits);
         savedSentencesArea.setText(content.toString());
