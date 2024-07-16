@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.ScrollPane?>
 <HBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.demo.HelloController">
 
@@ -23,10 +24,11 @@
     <TextArea fx:id="savedSentencesArea" minHeight="530" minWidth="180" maxWidth="220" editable="false" prefRowCount="10"/>
   </VBox>
 
-  <!-- Center VBox for Display -->
-  <VBox alignment="CENTER" spacing="20.0">
-    <Label fx:id="welcomeText"/>
+  <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml">
+    <Label fx:id="welcomeText" style="-fx-min-width: 70px; -fx-min-height: 25px;" />
     <Label fx:id="otherProducts" />
+      <Label fx:id="affichageSec" wrapText="true" prefWidth="550" prefHeight="550"/>
+
   </VBox>
 
   <!-- Drop Area VBox -->

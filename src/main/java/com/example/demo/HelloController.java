@@ -14,10 +14,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +30,9 @@ public class HelloController {
     private Label otherProducts;
 
     @FXML
+    private Label affichageSec;
+
+    @FXML
     private TextField sentenceField;
 
     @FXML
@@ -43,6 +43,7 @@ public class HelloController {
     private double totalBenefit=0;
 
     String affichage="";
+    String affichageSecondaire="";
 
 
     @FXML
@@ -91,8 +92,8 @@ public class HelloController {
             }
 
             int[] rowCounts = countRows(file);
-            affichage+="Number of rows in the first table: " + rowCounts[0] +
-                    "\nNumber of rows in the second table: " + rowCounts[1];
+            affichageSecondaire+="\nNumber of rows in the first table: " + rowCounts[0] +
+                    "\nNumber of rows in the second table: " + rowCounts[1]+"\n";
             welcomeText.setText(affichage);
         } catch (IOException e) {
             welcomeText.setText("Error reading file: " + e.getMessage());
@@ -228,19 +229,27 @@ public class HelloController {
                     }
                 }
             }
-            /*List <Hashtable<Integer,String>> quantiteNom;
-            quantiteNom= parseMultipleStrings(designation);*/
-
-            double priceCorresponding = findMatchingValue(designation, produits);
-            if (priceCorresponding != -999.0) {
-                System.out.println("Designation: " + designation + ", Montant: " + montant);
-                totalBenefit += montant-priceCorresponding*1000 ; // Adjust as per your business logic
-            }else{
-
-                allOtherProducts+=designation+"\n";
+            List <Hashtable<Integer,String>> quantiteNom;
+            quantiteNom= parseMultipleStrings(designation);
+            totalBenefit += montant;
+            for (Hashtable<Integer, String> hashtable : quantiteNom) {
+                for (Map.Entry<Integer, String> entry : hashtable.entrySet()) {
+                    Integer key = entry.getKey();
+                    String designa = entry.getValue();
+                    double priceCorresponding = findMatchingValue(designa, produits);
+                    if (priceCorresponding != -999.0) {
+                        affichageSecondaire+=key+" x  " + designa + ", \"Ras Lmal\": "+key*priceCorresponding+"\n";
+                        System.out.println(affichageSecondaire);
+                        totalBenefit -= key*priceCorresponding*1000 ; // Adjust as per your business logic
+                    }else{
+                        allOtherProducts+=designa+"\n";
+                    }
+                }
             }
+
         } //end "for"' loop
-        otherProducts.setText(allOtherProducts);
+        affichageSec.setText(affichageSecondaire);
+        otherProducts.setText(allOtherProducts.equals("Autre:\n")?"":allOtherProducts);
         affichage+="\nbenefit totale: "+totalBenefit/1000+" dt\n";
         return rowCount;
     }
