@@ -26,6 +26,7 @@
   <!-- Center VBox for Display -->
   <VBox alignment="CENTER" spacing="20.0">
     <Label fx:id="welcomeText"/>
+    <Label fx:id="otherProducts" />
   </VBox>
 
   <!-- Drop Area VBox -->

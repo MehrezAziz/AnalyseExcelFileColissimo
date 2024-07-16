@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HelloController {
 
@@ -26,6 +28,9 @@ public class HelloController {
 
     @FXML
     private VBox dropArea;
+
+    @FXML
+    private Label otherProducts;
 
     @FXML
     private TextField sentenceField;
@@ -37,7 +42,8 @@ public class HelloController {
 
     private double totalBenefit=0;
 
-    private List<String> other= new ArrayList<>();
+    String affichage="";
+
 
     @FXML
     private void initialize() {
@@ -85,8 +91,9 @@ public class HelloController {
             }
 
             int[] rowCounts = countRows(file);
-            welcomeText.setText("Number of rows in the first table: " + rowCounts[0] +
-                    "\nNumber of rows in the second table: " + rowCounts[1]);
+            affichage+="Number of rows in the first table: " + rowCounts[0] +
+                    "\nNumber of rows in the second table: " + rowCounts[1];
+            welcomeText.setText(affichage);
         } catch (IOException e) {
             welcomeText.setText("Error reading file: " + e.getMessage());
         }
@@ -181,12 +188,12 @@ public class HelloController {
         }
 
         int rowCount = 0;
-
+        String allOtherProducts="Autre:\n";
         // Process rows starting from startRow + 1
         for (int i = startRow+1; true; i++) {
             Row row = sheet.getRow(i);
             if (row == null || isRowEmpty(row)) {
-                break; // Stop processing if the row is empty or null
+                break;
             }
             rowCount++;
 
@@ -221,22 +228,20 @@ public class HelloController {
                     }
                 }
             }
+            /*List <Hashtable<Integer,String>> quantiteNom;
+            quantiteNom= parseMultipleStrings(designation);*/
 
-            // Print or process designation and montant
-
-
-            // Example usage of findMatchingValue to calculate totalBenefit
             double priceCorresponding = findMatchingValue(designation, produits);
             if (priceCorresponding != -999.0) {
                 System.out.println("Designation: " + designation + ", Montant: " + montant);
                 totalBenefit += montant-priceCorresponding*1000 ; // Adjust as per your business logic
             }else{
-                other.add(designation);
-            }
-        }
 
-        System.out.println("Net Benefit: " + totalBenefit);
-        System.out.println("not include: " + other+" lenght: "+other.size());
+                allOtherProducts+=designation+"\n";
+            }
+        } //end "for"' loop
+        otherProducts.setText(allOtherProducts);
+        affichage+="\nbenefit totale: "+totalBenefit/1000+" dt\n";
         return rowCount;
     }
 
@@ -321,6 +326,52 @@ public class HelloController {
         return false;
     }
 
+
+
+    public static Hashtable<Integer, String> parseString(String input) {
+        Hashtable<Integer, String> result = new Hashtable<>();
+
+        // Define a regex pattern to match the format: "number * string"
+        Pattern patternWithAsterisk = Pattern.compile("\\s*(\\d+)\\s*\\*\\s*(.+)\\s*");
+        Matcher matcherWithAsterisk = patternWithAsterisk.matcher(input);
+
+        if (matcherWithAsterisk.matches()) {
+            try {
+                int number = Integer.parseInt(matcherWithAsterisk.group(1));
+                String text = matcherWithAsterisk.group(2).trim();
+                result.put(number, text);
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing number: " + e.getMessage());
+            }
+        } else {
+            // If there's no *, default to 1
+            String trimmedInput = input.trim();
+            if (!trimmedInput.isEmpty()) {
+                result.put(1, trimmedInput);
+            } else {
+                System.err.println("Input string is empty or invalid.");
+            }
+        }
+
+        return result;
+    }
+
+    public static List<Hashtable<Integer, String>> parseMultipleStrings(String input) {
+        List<Hashtable<Integer, String>> resultList = new ArrayList<>();
+
+        // Split the input string by '+'
+        String[] parts = input.split("\\+");
+
+        for (String part : parts) {
+            // Trim each part and parse it
+            Hashtable<Integer, String> parsedPart = parseString(part.trim());
+            resultList.add(parsedPart);
+        }
+
+        return resultList;
+    }
+
+
     public static Hashtable<String, Double> extractNumbersFromParentheses(String sentence) {
         Hashtable<String, Double> result = new Hashtable<>();
 
@@ -357,6 +408,7 @@ public class HelloController {
 
         return result;
     }
+
     public static ArrayList<Hashtable<String, Double>> sortDictionariesByStringLength(ArrayList<Hashtable<String, Double>> inputList) {
         // Sort the list based on the length of the keys (strings) in descending order
         inputList.sort((dict1, dict2) -> {
