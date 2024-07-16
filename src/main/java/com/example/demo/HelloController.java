@@ -1,9 +1,7 @@
 package com.example.demo;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
@@ -11,6 +9,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
@@ -33,10 +32,21 @@ public class HelloController {
     private Label affichageSec;
 
     @FXML
+    private Label RetourEchange;
+
+    @FXML
     private TextField sentenceField;
 
     @FXML
     private TextArea savedSentencesArea;
+
+    @FXML
+    private ScrollPane scrollpaneAutre;
+
+    @FXML
+    private ScrollPane echangeRetour;
+
+    private ScrollPane sc= new ScrollPane();
 
     private ArrayList<Hashtable<String, Double>> produits = new ArrayList<>();
 
@@ -44,6 +54,7 @@ public class HelloController {
 
     String affichage="";
     String affichageSecondaire="";
+    String echange="Echange & Retour: ";
 
 
     @FXML
@@ -92,9 +103,8 @@ public class HelloController {
             }
 
             int[] rowCounts = countRows(file);
-            affichageSecondaire+="\nNumber of rows in the first table: " + rowCounts[0] +
-                    "\nNumber of rows in the second table: " + rowCounts[1]+"\n";
-            welcomeText.setText(affichage);
+
+            welcomeText.setText(affichage);  affichage="";
         } catch (IOException e) {
             welcomeText.setText("Error reading file: " + e.getMessage());
         }
@@ -170,7 +180,9 @@ public class HelloController {
         String searchString = "Détails des colis :";
         int startRow = 0;
 
-        // Find the row where the search string is located
+        int nbrRetourEchange=0;
+        int nbrAutre=0;
+
         for (int i = 0; true; i++) {
             Row row = sheet.getRow(i);
             if (row != null) {
@@ -189,7 +201,7 @@ public class HelloController {
         }
 
         int rowCount = 0;
-        String allOtherProducts="Autre:\n";
+        String allOtherProducts="Autre:";
         // Process rows starting from startRow + 1
         for (int i = startRow+1; true; i++) {
             Row row = sheet.getRow(i);
@@ -232,25 +244,47 @@ public class HelloController {
             List <Hashtable<Integer,String>> quantiteNom;
             quantiteNom= parseMultipleStrings(designation);
             totalBenefit += montant;
+            if(containsIgnoreCase(designation,"echange")
+                    || (containsIgnoreCase(designation,"Échange"))
+                    || (montant<=0)
+            ){
+
+
+                echange+="\n"+ ++nbrRetourEchange+":  "+designation +" , \"Montant Coliisimo\": "+montant/1000+" dt";
+                //totalBenefit+= montant;
+                continue;
+            }
+
             for (Hashtable<Integer, String> hashtable : quantiteNom) {
                 for (Map.Entry<Integer, String> entry : hashtable.entrySet()) {
                     Integer key = entry.getKey();
                     String designa = entry.getValue();
+
                     double priceCorresponding = findMatchingValue(designa, produits);
                     if (priceCorresponding != -999.0) {
-                        affichageSecondaire+=key+" x  " + designa + ", \"Ras Lmal\": "+key*priceCorresponding+"\n";
+                        affichageSecondaire+=key+" x  " + designa + ", \"Ras Lmal\": "+key*priceCorresponding+" dt\n";
                         System.out.println(affichageSecondaire);
                         totalBenefit -= key*priceCorresponding*1000 ; // Adjust as per your business logic
                     }else{
-                        allOtherProducts+=designa+"\n";
+
+                        allOtherProducts+="\n"+ ++nbrAutre+":  "+designa;
                     }
                 }
             }
 
         } //end "for"' loop
+        sc.setContent(affichageSec);
         affichageSec.setText(affichageSecondaire);
-        otherProducts.setText(allOtherProducts.equals("Autre:\n")?"":allOtherProducts);
-        affichage+="\nbenefit totale: "+totalBenefit/1000+" dt\n";
+        if(allOtherProducts.equals("Autre:")){
+            scrollpaneAutre.setVisible(false);
+            scrollpaneAutre.setMaxSize(0,0);
+        }else{
+            scrollpaneAutre.setVisible(true);
+            scrollpaneAutre.setMaxSize(550,120);
+        }
+        RetourEchange.setText(echange);
+        otherProducts.setText(allOtherProducts.equals("Autre:")?"":allOtherProducts);
+        affichage+="benefit totale: "+totalBenefit/1000+" dt"; totalBenefit=0;
         return rowCount;
     }
 

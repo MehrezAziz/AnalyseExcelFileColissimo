@@ -24,12 +24,29 @@
     <TextArea fx:id="savedSentencesArea" minHeight="530" minWidth="180" maxWidth="220" editable="false" prefRowCount="10"/>
   </VBox>
 
-  <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml">
-    <Label fx:id="welcomeText" style="-fx-min-width: 70px; -fx-min-height: 25px;" />
-    <Label fx:id="otherProducts" />
-      <Label fx:id="affichageSec" wrapText="true" prefWidth="550" prefHeight="550"/>
 
-  </VBox>
+    <VBox alignment="CENTER" spacing="20.0">
+
+
+      <Label style="-fx-min-width: 70px; -fx-min-height: 25px;"  />
+      <Label fx:id="welcomeText" style="-fx-min-width: 70px; -fx-min-height: 25px;"  />
+      <ScrollPane fx:id="echangeRetour" fitToWidth="fasle" fitToHeight="false" prefWidth="550" prefHeight="220"
+                  hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+
+        <Label fx:id="RetourEchange" />
+      </ScrollPane>
+      <ScrollPane fx:id="scrollpaneAutre" fitToWidth="fasle" fitToHeight="false" prefWidth="550" prefHeight="220"
+                  hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+
+        <Label fx:id="otherProducts" />
+      </ScrollPane>
+      <ScrollPane fitToWidth="fasle" fitToHeight="false" prefWidth="550" prefHeight="350"
+                  hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">
+
+        <Label fx:id="affichageSec" wrapText="true" />
+      </ScrollPane>
+    </VBox>
+
 
   <!-- Drop Area VBox -->
   <VBox fx:id="dropArea" alignment="CENTER" spacing="20.0" style="-fx-border-color: black; -fx-border-width: 2;" minHeight="200.0" minWidth="200.0">
