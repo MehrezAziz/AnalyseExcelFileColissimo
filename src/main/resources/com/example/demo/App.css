@@ -1,0 +1,15 @@
+.root {
+    -fx-background-image: url("background.jpg");
+    -fx-background-size: cover; /* Make the image cover the entire area */
+    -fx-background-repeat: no-repeat; /* Don't repeat the image */
+}
+#savedSentencesArea{
+
+}
+.scroll-pane {
+    -fx-background-image: url("background.jpg");
+    -fx-background-size: cover;
+    -fx-background-position: center center;
+    -fx-background-repeat: no-repeat;
+}
+
