@@ -21,7 +21,9 @@
     <TextField fx:id="sentenceField" promptText="Write a sentence"/>
     <Button text="Save" onAction="#saveSentence"/>
     <Label text="Saved Sentences:"/>
-    <TextArea fx:id="savedSentencesArea" minHeight="530" minWidth="180" maxWidth="220" editable="false" prefRowCount="10"/>
+    <ScrollPane  fitToWidth="fasle" fitToHeight="false" minHeight="530" minWidth="180" maxWidth="220">
+      <TextArea fx:id="savedSentencesArea" minHeight="530" minWidth="180" maxWidth="220" editable="false" prefRowCount="10"/>
+    </ScrollPane>
   </VBox>
 
 

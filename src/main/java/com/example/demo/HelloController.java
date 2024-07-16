@@ -310,16 +310,54 @@ public class HelloController {
     }
 
     @FXML
+
     private void saveSentence() {
-        String sentence = sentenceField.getText();
-        if (sentence == null || sentence.trim().isEmpty()) {
+        String newSentence = sentenceField.getText();
+        if (newSentence == null || newSentence.trim().isEmpty()) {
             return;
         }
 
-        try (FileWriter fw = new FileWriter("sentences.txt", true);
+        File file = new File("sentences.txt");
+        List<String> sentences = new ArrayList<>();
+
+        // Read the existing sentences
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sentences.add(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Check if the sentence exists and update it if necessary
+        boolean updated = false;
+        for (int i = 0; i < sentences.size(); i++) {
+            String existingSentence = sentences.get(i);
+            // Extract the base sentence part without the number in parentheses
+            String existingBase = existingSentence.replaceAll("\\s*\\(\\d+\\)\\s*$", "").trim();
+            String newBase = newSentence.replaceAll("\\s*\\(\\d+\\)\\s*$", "").trim();
+            if (existingBase.equalsIgnoreCase(newBase)) {
+                sentences.set(i, newSentence);
+                updated = true;
+                break;
+            }
+        }
+
+        // If the sentence does not exist, add it to the list
+        if (!updated) {
+            sentences.add(newSentence);
+        }
+
+        // Write the updated sentences back to the file
+        try (FileWriter fw = new FileWriter(file);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter out = new PrintWriter(bw)) {
-            out.println(sentence);
+            for (String sentence : sentences) {
+                out.println(sentence);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -327,6 +365,7 @@ public class HelloController {
         sentenceField.clear();
         loadSavedSentences();
     }
+
 
     private void loadSavedSentences() {
         File file = new File("sentences.txt");
